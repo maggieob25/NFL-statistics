@@ -1,0 +1,55 @@
+---
+title: "nfl statistics"
+author: "Maggie O'Brien"
+date: "2023-02-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+getwd()
+library(tidyverse)
+basicstats <- read.csv("NFL-statistics/CSVnflbasicstats.csv")
+
+dim(basicstats)
+names(basicstats)
+```
+##Need to delete X column
+
+```{r, echo=FALSE}
+basicstats %>%
+  filter(College == "Washington") %>%
+  summarize(count = n())
+```
+
+```{r}
+library(lubridate)
+monthdayyear <- as.Date(basicstats$Birthday, "%m/%d/%Y")
+basicstats %>%
+  mutate(birthdaymonth = month(as.Date(monthdayyear))) %>%
+  filter(!is.na(monthdayyear)) %>%
+  group_by(birthdaymonth) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x=birthdaymonth, y=count)) +
+  geom_col() 
+
+```
+Most common birth month is January.
+
+```{r}
+basicstats %>%
+  filter(is.na(Position) == FALSE, !is.na(Weight..lbs.),
+         !is.na(Height..inches.)) %>%
+  group_by(Position)%>%
+  summarize(meanweight = mean(Weight..lbs.),
+            meanheight= mean(Height..inches.)) %>%
+  ggplot(aes(x=meanweight, y=meanheight)) +
+  geom_point()
+```
+
+
+
+
