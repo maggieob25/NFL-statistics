@@ -10,9 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-getwd()
 library(tidyverse)
-basicstats <- read.csv("NFL-statistics/CSVnflbasicstats.csv")
+basicstats <- read.csv("CSVnflbasicstats.csv")
 
 dim(basicstats)
 names(basicstats)
@@ -49,6 +48,7 @@ basicstats %>%
   ggplot(aes(x=meanweight, y=meanheight)) +
   geom_point()
 ```
+
 
 
 
