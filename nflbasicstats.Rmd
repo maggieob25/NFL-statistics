@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 getwd()
 library(tidyverse)
-basicstats <- read.csv("NFL-statistics/CSVnflbasicstats.csv")
+basicstats <- read.csv("CSVnflbasicstats.csv")
 
 dim(basicstats)
 names(basicstats)
@@ -23,6 +23,14 @@ names(basicstats)
 basicstats %>%
   filter(College == "Washington") %>%
   summarize(count = n())
+```
+
+```{r, echo=FALSE}
+basicstats %>%
+  filter(!is.na(College)) %>%
+  group_by(College) %>%
+  summarize(count = n()) %>%
+  arrange(desc(rank(count)))
 ```
 
 ```{r}
@@ -39,16 +47,49 @@ basicstats %>%
 ```
 Most common birth month is January.
 
-```{r}
-basicstats %>%
+
+```{r, echo=FALSE}
+defense <- basicstats %>%
+  filter(!is.na(Position),
+         Position == c("CB", "DB", "DE", "DL", "DT", "FS", "ILB", "LB", "MLB", "NT", "SAF", "SS")) %>%
+  select(Height..inches., Position, Weight..lbs.)
+
+offense <- basicstats %>%
+filter(!is.na(Position),
+         Position == c("C", "FB", "G", "OG", "OL", "OLB", "OT", "QB", "RB", "WR", "T", "TE")) %>%
+  select(Height..inches., Position, Weight..lbs.)
+
+specialteams <- basicstats %>%
+  filter(!is.na(Position),
+         Position == c("K", "LS", "P")) %>%
+  select(Height..inches., Position, Weight..lbs.)
+
+datacombined <- bind_rows(specialteams, offense, defense, .id = "Grouped Teams")
+```
+
+```{r, echo=FALSE}
+datacombined %>%
   filter(is.na(Position) == FALSE, !is.na(Weight..lbs.),
          !is.na(Height..inches.)) %>%
   group_by(Position)%>%
   summarize(meanweight = mean(Weight..lbs.),
             meanheight= mean(Height..inches.)) %>%
-  ggplot(aes(x=meanweight, y=meanheight)) +
-  geom_point()
+  ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
+             col=Position)) +
+  geom_point() +
+  labs(title = "Weight vs. Height per position",
+         x = "Mean weight (lbs)", y = "Mean height (in)",
+       size = "Weight/height (lbs/in)",
+       color = "Position")
 ```
+```{r}
+datacombined %>%
+  filter(is.na(Position) == FALSE, !is.na(Weight..lbs.)) %>%
+  group_by(Position)%>%
+  ggplot(aes(x=(Weight..lbs.))) + 
+  geom_histogram(position = "dodge")
+```
+## how can i factor this by current status?!?!!??!
 
 
 
