@@ -49,8 +49,7 @@ Most common birth month is January.
 
 ```{r, echo=FALSE}
 defense <- basicstats %>%
-  filter(!is.na(Position),
-         Position == c("CB", "DB", "DE", "DL", "DT", "FS", "ILB", "LB", "MLB", "NT", "SAF", "SS")) %>%
+  filter(Position == c("CB", "DB", "DE", "DL", "DT", "FS", "ILB", "LB", "MLB", "NT", "SAF", "SS")) %>%
   select(Height..inches., Position, Weight..lbs.)
 
 offense <- basicstats %>%
