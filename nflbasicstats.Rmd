@@ -10,7 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-getwd()
 library(tidyverse)
 basicstats <- read.csv("CSVnflbasicstats.csv")
 
@@ -90,6 +89,7 @@ datacombined %>%
   geom_histogram(position = "dodge")
 ```
 ## how can i factor this by current status?!?!!??!
+
 
 
 
