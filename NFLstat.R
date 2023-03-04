@@ -10,6 +10,7 @@ df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE
 df_college <- df%>% group_by(College) %>% summarize(number_of_players=n())
 df_college <- df_college[order(df_college$number_of_players,decreasing = TRUE),] 
 
+
 ui <- fluidPage(
   titlePanel("INFO 201 - Final Project"),
   mainPanel(
