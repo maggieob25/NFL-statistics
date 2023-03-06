@@ -2,7 +2,7 @@ library(shiny)
 library(tidyverse)
 library(DT)
 
-df <- read_delim("CSVnflbasicstats.csv")
+df <- read.csv("CSVnflbasicstats.csv")
 
 df_position <- df%>% group_by(Position) %>% summarize(number_of_players=n())
 df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE),] 
@@ -36,7 +36,7 @@ ui <- fluidPage(
                              selectize = FALSE),
                  checkboxGroupInput(inputId = "position_select",
                                     label = "Select position(s)",
-                                    choices = unique(basicstats$Position),
+                                    choices = unique(df$Position),
                                     selected = "CB",
                                     inline = FALSE,
                                     width = NULL),
@@ -136,15 +136,14 @@ server <- function(input, output) {
   output$college_table <- DT::renderDataTable(df_college,options = list(pageLength = 5))
   
   data_subset <- reactive({
-    basicstats %>%
+    df %>%
       filter(Position %in% input$groups,
              Position %in% input$position_select)
   })
   
   output$plot1 <- renderPlot ({
     data_subset() %>% 
-      filter(!is.na(Weight..lbs.),
-             !is.na(Height..inches.)) %>%
+      filter(!is.na(Weight..lbs.), !is.na(Height..inches.)) %>%
       group_by(Position)%>%
       summarize(meanweight = mean(Weight..lbs.),
                 meanheight= mean(Height..inches.)) %>%
