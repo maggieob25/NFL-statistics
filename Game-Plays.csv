@@ -1,4 +1,4 @@
-"","Team","Year","Pass.Attempts","Pass.Completion.Rate","Avg.Passing.Yards","Rush Attempts","Avg Rushing Yards"
+"","Team","Year","Pass_Attempts","Pass_Completion_Rate","Avg_Passing_Yards","Rush_attempts","Avg_Rushing"
 "1","Arizona Cardinals",1994,238,55.9,1510,20,59
 "2","Arizona Cardinals",1995,NA,NA,NA,13.8333333333333,44
 "3","Arizona Cardinals",1996,339,56,2293,46,183.166666666667

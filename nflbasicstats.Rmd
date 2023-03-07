@@ -54,6 +54,40 @@ basicstats %>%
   arrange(desc(rank(count)))
 ```
 
+                              
+    plotOutput("plot2")
+    
+    
+    
+      data_subset <- reactive({
+    df %>%
+      filter(Position %in% input$groups,
+             Position %in% input$position_select) 
+  })
+  output$plot1 <- renderPlot ({
+    data_subset() %>%
+      filter(!is.na(Weight), !is.na(Height)) %>%
+      group_by(Position)%>%
+      summarize(meanweight = mean(Weight),
+                meanheight= mean(Height)) %>%
+      ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
+                 col=Position)) +
+      geom_point() +
+      labs(title = "Weight vs. Height per position",
+           x = "Mean weight (lbs)", y = "Mean height (in)",
+           size = "Weight/height (lbs/in)",
+           color = "Position")
+  })
+  
+  output$plot2 <- renderPlot ({
+    df %>%
+      filter(!is.na(Weight), Position != "",
+             !is.na(Height), Current.Status == "Active") %>%
+      ggplot(aes(x=Weight, y=Height)) +
+      geom_point(col=input$color) +
+      labs(title = "Weight vs. Height")
+  })
+
 ```{r}
 library(lubridate)
 monthdayyear <- as.Date(basicstats$Birthday, "%m/%d/%Y")

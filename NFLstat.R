@@ -2,9 +2,11 @@ library(shiny)
 library(tidyverse)
 library(DT)
 
-df <- read.csv("CSVnflbasicstatsNEW.csv")
+df <- read_delim("CSVnflbasicstatsNEW.csv")
+df2 <- read_delim("Game-Plays.csv")
+names(df2)
 
-df_position <- df %>% group_by(Position) %>% summarize(number_of_players=n())
+df_position <- df%>% group_by(Position) %>% summarize(number_of_players=n())
 df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE),] 
 
 
@@ -22,53 +24,13 @@ coloroptions <- c("cornflowerblue", "darkorchid4", "darkred", "darkorange3",
                                   "darkolivegreen4")
 
 ui <- fluidPage(
-  tags$head(
-    tags$style(
-      HTML(
-        "body {
-          background-color: #D6EAF8;
-        }"
-      )
-    )
-  ),
   titlePanel("INFO 201 - Final Project"),
   mainPanel(
     tabsetPanel(
       tabPanel("Introduction",
-               mainPanel(
-                 br(),
-                 h3("The Dataset"),
-                 p("The dataset we will be using is the basic information on NFL 
-               players and their statistics.  
-               We found this dataset on Kaggle.  
-               There are three groups of data (basic stats, career stats, 
-               and game logs).  This data was collected by the National 
-               Football League.  However, this data was last updated 6 years ago, 
-               according to Kaggle, so there will likely be some out-of-date 
-               information."),
-                 h3("The Audience"),
-                 p("Some audiences for this data could be anyone who is interested 
-                 in football statistics, an individual in a fantasy football league, 
-                 or an avid fan of America’s pastime.  These audiences overlap, 
-                 so the target audience is ", tags$b("an enthusiastic football fan.")),
-                 h3("Questions of focus"),
-                 tags$ul(
-                   tags$li("What is average height and weight for professional
-                         football players, and does this vary by position?"),
-                   tags$li("What college do professional football players most 
-                         frequently hail from, and what positions do they play?"),
-                   tags$li("What teams are more likely to do a rush play rather 
-                         than a pass play? What are the average yards gained 
-                         for rushing per yard?"))
-               ),
-               sidebarPanel(
-                 p("BH3 group: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, 
-                 Yishi Zheng"),
-                 img(alt = "NFL Logo", 
-                     src = "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg"),
-               )
-      ),
-      tabPanel("Height/Weight Analysis",
+               br(),
+               p("BH3 group numbers: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, Yishi Zheng")),
+      tabPanel("Height/Weight Info",
                sidebarPanel(
                  selectInput(inputId = "groups", label = "Select offense, etc.", 
                              choices = c("Defense" = paste(defense_positions, 
@@ -91,12 +53,24 @@ ui <- fluidPage(
                ),
                mainPanel(
                  plotOutput("plot1"),
-                 verbatimTextOutput("summary"),
-                 plotOutput("plot2")
+                 verbatimTextOutput("summary")
                )
       ),
-      tabPanel("Rushing/Passing"),
-      tabPanel("College Data",
+      tabPanel("Game plays",
+               sidebarPanel(
+                 selectInput("Team_select", label = "Select a team", 
+                             choices = df2$Team),
+                 p("Please choose a team before the year!"),
+                 p(em("Some years are missing due to lack of data from those years")),
+                 uiOutput("CheckboxYear")
+                 
+                 
+               ),
+               mainPanel(
+                 tableOutput("Game_Table")
+               )
+      ),
+      tabPanel("college and position",
                sidebarLayout(
                  sidebarPanel(
                    sliderInput("n", 
@@ -145,7 +119,7 @@ ui <- fluidPage(
                  )
                )
       ),
-      tabPanel("Conclusion"),
+      tabPanel("Conclusion")
     )
   )
 )
@@ -175,11 +149,6 @@ server <- function(input, output) {
       s1
   })
   
-  output$summary <- renderPrint({ 
-    sample <- sample_n(df, 10, replace = FALSE)
-    print(sample)
-  })
-  
   output$position <- renderPlot({
     ggplot(sample(), aes(x = Position,col= College))+
       geom_bar() + 
@@ -195,12 +164,15 @@ server <- function(input, output) {
       filter(Position %in% input$groups,
              Position %in% input$position_select) 
   })
+  
   output$plot1 <- renderPlot ({
-    data_subset() %>%
-      filter(!is.na(Weight), !is.na(Height)) %>%
+    data_subset() %>% 
+      filter(!is.na(Weight..lbs.),
+             !is.na(Height..inches.)) %>%
       group_by(Position)%>%
-      summarize(meanweight = mean(Weight),
-                meanheight= mean(Height)) %>%
+      summarize(meanweight = mean(Weight..lbs.),
+                meanheight= mean(Height..inches.)) %>%
+      filter(Position %in% input$position_select) %>%
       ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
                  col=Position)) +
       geom_point() +
@@ -210,15 +182,34 @@ server <- function(input, output) {
            color = "Position")
   })
   
-  output$plot2 <- renderPlot ({
-    df %>%
-      filter(!is.na(Weight), Position != "",
-             !is.na(Height), Current.Status == "Active") %>%
-      ggplot(aes(x=Weight, y=Height)) +
-      geom_point(col=input$color) +
-      labs(title = "Weight vs. Height")
+  Team_data<- reactive({
+    s2 <- df2 %>% 
+      filter(Team %in% input$Team_select)
+  })
+  
+  
+  output$CheckboxYear <- renderUI({
+    s3 <- df2 %>% 
+      filter(Team %in% input$Team_select) %>% 
+      mutate(Passing = Pass_Attempts, Rushing = Rush_attempts) %>% 
+      filter(!is.na(Passing) & !is.na(Rushing))
+    
+    checkboxGroupInput("Year_Select", "Choose Year",
+                       choices = unique(s3$Year))
+  })
+  
+  Year_data <- reactive({
+    s4 <- df2 %>% 
+      filter(Year %in% input$Year_Select)
+  })
+  
+  output$Game_Table <- renderTable({
+    t <- Year_data() %>% 
+      summarize(Pass = mean(Pass_Attempt), Pass_Completion = mean(Pass_Completion_Rate), 
+                Avg_Passing_Yd = mean(Avg_Passing_Yards), Rush= (Rush_attempts),
+                Avg_Rushing_Yd = mean(Avg_Rushing))
+    
   })
 }
-names(df)
 
 shinyApp(ui = ui, server = server)
