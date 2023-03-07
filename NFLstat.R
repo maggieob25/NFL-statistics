@@ -4,9 +4,7 @@ library(DT)
 
 df <- read_delim("CSVnflbasicstats.csv")
 df2 <- read_delim("Game-Plays.csv")
-dog <- c(names(df2))
-Pass <- dog[4]
-Pass
+names(df2)
 
 df_position <- df%>% group_by(Position) %>% summarize(number_of_players=n())
 df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE),] 
@@ -53,12 +51,14 @@ ui <- fluidPage(
                sidebarPanel(
                  selectInput("Team_select", label = "Select a team", 
                              choices = df2$Team),
+                 p("Please choose a team before the year!"),
+                 p(em("Some years are missing due to lack of data from those years")),
                  uiOutput("CheckboxYear")
                  
 
                ),
                mainPanel(
-                 
+                 tableOutput("Game_Table")
                )
                ),
       tabPanel("college and position",
@@ -181,14 +181,26 @@ server <- function(input, output) {
   
   output$CheckboxYear <- renderUI({
     s3 <- df2 %>% 
-      filter(Team %in% input$Team_select)
-      mutate(Passing = Pass, Rushing =`Rushing.Attempts`  )
+      filter(Team %in% input$Team_select) %>% 
+      mutate(Passing = Pass_Attempts, Rushing = Rush_attempts) %>% 
       filter(!is.na(Passing) & !is.na(Rushing))
 
     checkboxGroupInput("Year_Select", "Choose Year",
                        choices = unique(s3$Year))
   })
   
+  Year_data <- reactive({
+    s4 <- df2 %>% 
+      filter(Year %in% input$Year_Select)
+  })
+  
+  output$Game_Table <- renderTable({
+    t <- Year_data() %>% 
+      summarize(Pass = mean(Pass_Attempt), Pass_Completion = mean(Pass_Completion_Rate), 
+                Avg_Passing_Yd = mean(Avg_Passing_Yards), Rush= (Rush_attempts),
+                Avg_Rushing_Yd = mean(Avg_Rushing))
+    
+  })
   
 }
 
