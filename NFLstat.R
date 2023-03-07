@@ -29,7 +29,9 @@ ui <- fluidPage(
       tabPanel("Introduction",
                br(),
                h3("The Data"),
-               p("The dataset we will be using is the basic information on NFL players and their statistics.  We found this dataset on Kaggle.  There are three groups of data (basic stats, career stats, and game logs).  This data was collected by the National Football League.  However, this data was last updated 6 years ago, according to Kaggle, so there will likely be some out-of-date information.  
+               p("The", tags$a("dataset", href = "https://www.kaggle.com/datasets/kendallgillies/nflstatistics"),
+               "we will be using is the basic information on 
+               NFL players and their statistics.  We found this dataset on Kaggle.  There are three groups of data (basic stats, career stats, and game logs).  This data was collected by the National Football League.  However, this data was last updated 6 years ago, according to Kaggle, so there will likely be some out-of-date information.  
 "),
                h3("The Audience"),
                p("Some audiences for this data could be anyone who is interested 
@@ -44,7 +46,7 @@ ui <- fluidPage(
                        per yard?"),
                tags$li("What is the average weight and height of each football
                        position?"),
-               br(),
+               tags$img(src = "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg"),
                h3("The Group"),
                p("BH3 group numbers: Tawsif Ahmed, Maggie O'Brien, 
                  Carol Zhao, Yishi Zheng")
