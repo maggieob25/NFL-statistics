@@ -32,24 +32,20 @@ ui <- fluidPage(
                p("BH3 group numbers: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, Yishi Zheng")),
       tabPanel("Height/Weight Info",
                sidebarPanel(
-                 selectInput(inputId = "groups", label = "Select offense, etc.", 
-                             choices = c("Defense" = paste(defense_positions, 
-                                                           collapse = ", "), 
-                                         "Offense" = paste(offense_positions, 
-                                                           collapse = ", "),
-                                         "Special Teams" = paste(specialteams,
-                                                                 collapse = ", ")),
-                             selectize = FALSE),
+                 ## selectInput(inputId = "groups", label = "Select offense, etc.", 
+                             ## choices = c("Defense" = paste(defense_positions, 
+                                       ##                    collapse = ", "), 
+                                      ##   "Offense" = paste(offense_positions, 
+                                      ##                     collapse = ", "),
+                                     ##    "Special Teams" = paste(specialteams,
+                                        ##                         collapse = ", ")),
+                           ##  selectize = FALSE),
                  checkboxGroupInput(inputId = "position_select",
                                     label = "Select position(s)",
                                     choices = no_blanks, 
                                     selected = "CB",
                                     inline = FALSE,
-                                    width = NULL),
-                 radioButtons(inputId = "color",
-                              label = "Select a color",
-                              choices = coloroptions,
-                              selected = coloroptions[1]),
+                                    width = NULL)
                ),
                mainPanel(
                  plotOutput("plot1"),
@@ -158,17 +154,17 @@ server <- function(input, output) {
   
   data_subset <- reactive({
     df %>%
-      filter(Position %in% input$groups,
+      filter(## Position %in% input$groups,
              Position %in% input$position_select) 
   })
   
   output$plot1 <- renderPlot ({
     data_subset() %>% 
-      filter(!is.na(Weight..lbs.),
-             !is.na(Height..inches.)) %>%
+      filter(!is.na(Weight),
+             !is.na(Height)) %>%
       group_by(Position)%>%
-      summarize(meanweight = mean(Weight..lbs.),
-                meanheight= mean(Height..inches.)) %>%
+      summarize(meanweight = mean(Weight),
+                meanheight= mean(Height)) %>%
       filter(Position %in% input$position_select) %>%
       ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
                  col=Position)) +
