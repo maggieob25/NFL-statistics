@@ -58,10 +58,10 @@ ui <- fluidPage(
       ),
       tabPanel("Game plays",
                sidebarPanel(
+                 selectInput(inputId = "Decades", label = "Select a Decade", 
+                             choices = c("Before 2000", "After 2000")),
                  p(em("Some years are missing due to lack of data from those years")),
                  uiOutput("CheckboxTeam")
-                 
-                 
                ),
                mainPanel(
                  tableOutput("Game_Table")
@@ -188,15 +188,31 @@ server <- function(input, output) {
   
   Team_data<- reactive({
     s2 <- df2 %>% 
-      filter(Team %in% input$Team_select) %>% 
+      filter(Team %in% input$Team_Select) %>% 
       mutate(Passing = Pass_Attempts, Rushing = Rush_attempts) %>% 
       filter(!is.na(Passing) & !is.na(Rushing))
   })
   
   output$Game_Table <- renderTable({
+    
+    if(input$Decades == "Before 2000"){
     t <- Team_data() %>% 
+      filter(Year < 2000) %>% 
       group_by(Year) %>% 
-      summarize(Pass = mean(Pass_Attempts), Rush = mean(Rush_attempts))
+      summarize(Passing_Attempts = mean(Pass_Attempts), Pass_Completion_Rate = mean(Pass_Completion_Rate),
+                Avg_Passing_Yds = mean(Avg_Passing_Yards), Rushing_Attempts = mean(Rush_attempts),
+                Avg_Rushing_Yds = mean(Avg_Rushing)
+                )
+    }
+    else{
+      t <- Team_data() %>% 
+        filter(Year > 2000) %>% 
+        group_by(Year) %>% 
+        summarize(Passing_Attempts = mean(Pass_Attempts), Pass_Completion_Rate = mean(Pass_Completion_Rate),
+                  Avg_Passing_Yds = mean(Avg_Passing_Yards), Rushing_Attempts = mean(Rush_attempts),
+                  Avg_Rushing_Yds = mean(Avg_Rushing)
+        )
+    }
     
   })
 }
