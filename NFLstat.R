@@ -4,7 +4,6 @@ library(DT)
 
 df <- read_delim("CSVnflbasicstatsNEW.csv")
 df2 <- read_delim("Game-Plays.csv")
-names(df2)
 
 df_position <- df%>% group_by(Position) %>% summarize(number_of_players=n())
 df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE),] 
@@ -32,24 +31,23 @@ ui <- fluidPage(
                p("BH3 group numbers: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, Yishi Zheng")),
       tabPanel("Height/Weight Info",
                sidebarPanel(
-                 ## selectInput(inputId = "groups", label = "Select offense, etc.", 
-                             ## choices = c("Defense" = paste(defense_positions, 
-                                       ##                    collapse = ", "), 
-                                      ##   "Offense" = paste(offense_positions, 
-                                      ##                     collapse = ", "),
-                                     ##    "Special Teams" = paste(specialteams,
-                                        ##                         collapse = ", ")),
-                           ##  selectize = FALSE),
                  checkboxGroupInput(inputId = "position_select",
                                     label = "Select position(s)",
                                     choices = no_blanks, 
-                                    selected = "CB",
+                                    selected = c("QB", "RB", "WR", "TE"),
                                     inline = FALSE,
-                                    width = NULL)
+                                    width = NULL),
+                 selectInput(inputId = "groups", label = "Select offense, etc.", 
+                             choices = c("Defense" = paste(defense_positions, collapse = ", "), 
+                             "Offense" = paste(offense_positions, collapse = ", "),
+                             "Special Teams" = paste(specialteams,collapse = ", ")),
+                             selected = "Defense")
                ),
                mainPanel(
                  plotOutput("plot1"),
-                 verbatimTextOutput("summary")
+                 verbatimTextOutput("summary"),
+                 tags$hr(),
+                 plotOutput("plot2")
                )
       ),
       tabPanel("Game plays",
@@ -154,8 +152,7 @@ server <- function(input, output) {
   
   data_subset <- reactive({
     df %>%
-      filter(## Position %in% input$groups,
-             Position %in% input$position_select) 
+      filter(Position %in% input$position_select) 
   })
   
   output$plot1 <- renderPlot ({
@@ -165,7 +162,6 @@ server <- function(input, output) {
       group_by(Position)%>%
       summarize(meanweight = mean(Weight),
                 meanheight= mean(Height)) %>%
-      filter(Position %in% input$position_select) %>%
       ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
                  col=Position)) +
       geom_point() +
@@ -175,6 +171,22 @@ server <- function(input, output) {
            color = "Position")
   })
   
+  data_subset2 <- reactive({
+    df %>%
+      filter(Position %in% input$groups) 
+  })
+  
+  output$plot2 <- renderPlot ({
+    data_subset2() %>% 
+      filter(!is.na(Weight),
+             !is.na(Height)) %>%
+      group_by(Position)%>%
+      ggplot(aes(x=Weight, y=Height, size=(Weight/Height), 
+                 col=Position)) +
+      geom_point() +
+      labs(title = "Weight vs. Height per 'team'",
+           x = "Weight (lbs)", y = "Height (in)", color = "Position")
+  })
   
   output$CheckboxTeam <- renderUI({
     
