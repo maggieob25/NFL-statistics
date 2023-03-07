@@ -2,9 +2,9 @@ library(shiny)
 library(tidyverse)
 library(DT)
 
-df <- read.csv("CSVnflbasicstats.csv")
+df <- read.csv("CSVnflbasicstatsNEW.csv")
 
-df_position <- df%>% group_by(Position) %>% summarize(number_of_players=n())
+df_position <- df %>% group_by(Position) %>% summarize(number_of_players=n())
 df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE),] 
 
 
@@ -22,9 +22,34 @@ ui <- fluidPage(
   mainPanel(
     tabsetPanel(
       tabPanel("Introduction",
+               h2("BH3 group: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, 
+                 Yishi Zheng"),
                br(),
-               p("BH3 group numbers: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, Yishi Zheng")),
-      tabPanel("page 2",
+               h3("The Dataset"),
+               p("The dataset we will be using is the basic information on NFL 
+               players and their statistics.  
+               We found this dataset on Kaggle.  
+               There are three groups of data (basic stats, career stats, 
+               and game logs).  This data was collected by the National 
+               Football League.  However, this data was last updated 6 years ago, 
+               according to Kaggle, so there will likely be some out-of-date 
+               information."),
+               h3("The Audience"),
+               p("Some audiences for this data could be anyone who is interested 
+                 in football statistics, an individual in a fantasy football league, 
+                 or an avid fan of America’s pastime.  These audiences overlap, 
+                 so the target audience is ", tags$b("an enthusiastic football fan.")),
+               h3("Questions of focus"),
+               tags$ul(
+                 tags$li("On average, how long does a player in a particular 
+                         position play professionally?"),
+                 tags$li("What college do professional football players most 
+                         frequently hail from, and what positions do they play?"),
+                 tags$li("What teams are more likely to do a rush play rather 
+                         than a pass play? What are the average yards gained 
+                         for rushing per yard?"))
+               ),  
+      tabPanel("Height/Weight Analysis",
                sidebarPanel(
                  selectInput(inputId = "groups", label = "Select offense, etc.", 
                              choices = c("Defense" = paste(defense_positions, 
@@ -42,7 +67,7 @@ ui <- fluidPage(
                                     width = NULL),
                ),
                mainPanel(
-                 plotOutput("plot1", width = "800px", height = "600px")
+                 plotOutput("plot1")
                )
       ),
       tabPanel("page 3"),
@@ -140,14 +165,12 @@ server <- function(input, output) {
       filter(Position %in% input$groups,
              Position %in% input$position_select)
   })
-  
   output$plot1 <- renderPlot ({
     data_subset() %>% 
-      filter(!is.na(Weight..lbs.), !is.na(Height..inches.)) %>%
+      filter(!is.na(Weight), !is.na(Height)) %>%
       group_by(Position)%>%
-      summarize(meanweight = mean(Weight..lbs.),
-                meanheight= mean(Height..inches.)) %>%
-      filter(Position %in% input$position_select) %>%
+      summarize(meanweight = mean(Weight),
+                meanheight= mean(Height)) %>%
       ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
                  col=Position)) +
       geom_point() +
