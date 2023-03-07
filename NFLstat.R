@@ -55,12 +55,12 @@ ui <- fluidPage(
                  p(em("Some years are missing due to lack of data from those years")),
                  uiOutput("CheckboxYear")
                  
-
+                 
                ),
                mainPanel(
                  tableOutput("Game_Table")
                )
-               ),
+      ),
       tabPanel("college and position",
                sidebarLayout(
                  sidebarPanel(
@@ -184,7 +184,7 @@ server <- function(input, output) {
       filter(Team %in% input$Team_select) %>% 
       mutate(Passing = Pass_Attempts, Rushing = Rush_attempts) %>% 
       filter(!is.na(Passing) & !is.na(Rushing))
-
+    
     checkboxGroupInput("Year_Select", "Choose Year",
                        choices = unique(s3$Year))
   })

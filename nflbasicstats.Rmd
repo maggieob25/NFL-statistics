@@ -4,10 +4,55 @@ author: "Maggie O'Brien"
 date: "2023-02-22"
 output: html_document
 ---
-
+```{r}
+  data_subset <- reactive({
+    df %>%
+      filter(Position %in% input$groups,
+             Position %in% input$position_select)
+  })
+  
+  output$plot1 <- renderPlot ({
+    data_subset() %>% 
+      filter(!is.na(Weight..lbs.), !is.na(Height..inches.)) %>%
+      group_by(Position)%>%
+      summarize(meanweight = mean(Weight..lbs.),
+                meanheight= mean(Height..inches.)) %>%
+      filter(Position %in% input$position_select) %>%
+      ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
+                 col=Position)) +
+      geom_point() +
+      labs(title = "Weight vs. Height per position",
+           x = "Mean weight (lbs)", y = "Mean height (in)",
+           size = "Weight/height (lbs/in)",
+           color = "Position")
+  })
+}
+```
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r}
+  output$plot1 <- renderPlot ({
+    p <- df %>%
+      filter(Position %in% input$groups,
+             Position %in% input$position_select) %>%
+      group_by(Position) %>%
+      summarize(meanweight = mean(Weight),
+                meanheight= mean(Height)) %>%
+      ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
+                 col=Position)) +
+      labs(title = "Weight vs. Height per position",
+           x = "Mean weight (lbs)", y = "Mean height (in)",
+           size = "Weight/height (lbs/in)",
+           color = "Position")
+    for (i in 1:length(input$position_select)) {
+      p <- p + 
+        geom_point(data = filter(df, Position == input$position_select[i])) 
+    }
+    p
+  })
+````
 
 ```{r}
 library(tidyverse)
