@@ -18,15 +18,23 @@ offense_positions <- c("C", "FB", "G", "OG", "OL", "OLB", "OT", "QB", "RB",
 specialteams <- c("K", "LS", "P")
 
 ui <- fluidPage(
+  tags$head(
+    tags$style(
+      HTML(
+        "body {
+          background-color: #D6EAF8;
+        }"
+      )
+    )
+  ),
   titlePanel("INFO 201 - Final Project"),
   mainPanel(
     tabsetPanel(
       tabPanel("Introduction",
-               h2("BH3 group: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, 
-                 Yishi Zheng"),
-               br(),
-               h3("The Dataset"),
-               p("The dataset we will be using is the basic information on NFL 
+               mainPanel(
+                 br(),
+                 h3("The Dataset"),
+                 p("The dataset we will be using is the basic information on NFL 
                players and their statistics.  
                We found this dataset on Kaggle.  
                There are three groups of data (basic stats, career stats, 
@@ -34,21 +42,28 @@ ui <- fluidPage(
                Football League.  However, this data was last updated 6 years ago, 
                according to Kaggle, so there will likely be some out-of-date 
                information."),
-               h3("The Audience"),
-               p("Some audiences for this data could be anyone who is interested 
+                 h3("The Audience"),
+                 p("Some audiences for this data could be anyone who is interested 
                  in football statistics, an individual in a fantasy football league, 
                  or an avid fan of America’s pastime.  These audiences overlap, 
                  so the target audience is ", tags$b("an enthusiastic football fan.")),
-               h3("Questions of focus"),
-               tags$ul(
-                 tags$li("On average, how long does a player in a particular 
-                         position play professionally?"),
-                 tags$li("What college do professional football players most 
+                 h3("Questions of focus"),
+                 tags$ul(
+                   tags$li("What is average height and weight for professional
+                         football players, and does this vary by position?"),
+                   tags$li("What college do professional football players most 
                          frequently hail from, and what positions do they play?"),
-                 tags$li("What teams are more likely to do a rush play rather 
+                   tags$li("What teams are more likely to do a rush play rather 
                          than a pass play? What are the average yards gained 
                          for rushing per yard?"))
-               ),  
+               ),
+               sidebarPanel(
+                 p("BH3 group: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, 
+                 Yishi Zheng"),
+                 img(alt = "NFL Logo", 
+                     src = "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg"),
+               )
+      ),
       tabPanel("Height/Weight Analysis",
                sidebarPanel(
                  selectInput(inputId = "groups", label = "Select offense, etc.", 
@@ -67,11 +82,12 @@ ui <- fluidPage(
                                     width = NULL),
                ),
                mainPanel(
-                 plotOutput("plot1")
+                 plotOutput("plot1"),
+                 verbatimTextOutput("summary")
                )
       ),
-      tabPanel("page 3"),
-      tabPanel("college and position",
+      tabPanel("Rushing/Passing"),
+      tabPanel("College Data",
                sidebarLayout(
                  sidebarPanel(
                    sliderInput("n", 
@@ -148,6 +164,11 @@ server <- function(input, output) {
       sample_n(s1, input$n)
     else
       s1
+  })
+  
+  output$summary <- renderPrint({ 
+    sample <- sample_n(df, 10, replace = FALSE)
+    print(sample)
   })
   
   output$position <- renderPlot({
