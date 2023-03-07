@@ -80,6 +80,7 @@ datacombined %>%
        size = "Weight/height (lbs/in)",
        color = "Position")
 ```
+
 ```{r}
 datacombined %>%
   filter(is.na(Position) == FALSE, !is.na(Weight..lbs.)) %>%

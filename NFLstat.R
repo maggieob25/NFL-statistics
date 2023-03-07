@@ -3,6 +3,10 @@ library(tidyverse)
 library(DT)
 
 df <- read_delim("CSVnflbasicstats.csv")
+df2 <- read_delim("Game-Plays.csv")
+dog <- c(names(df2))
+Pass <- dog[4]
+Pass
 
 df_position <- df%>% group_by(Position) %>% summarize(number_of_players=n())
 df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE),] 
@@ -36,7 +40,7 @@ ui <- fluidPage(
                              selectize = FALSE),
                  checkboxGroupInput(inputId = "position_select",
                                     label = "Select position(s)",
-                                    choices = unique(basicstats$Position),
+                                    choices = unique(df$Position),
                                     selected = "CB",
                                     inline = FALSE,
                                     width = NULL),
@@ -45,7 +49,18 @@ ui <- fluidPage(
                  plotOutput("plot1", width = "800px", height = "600px")
                )
       ),
-      tabPanel("page 3"),
+      tabPanel("Game plays",
+               sidebarPanel(
+                 selectInput("Team_select", label = "Select a team", 
+                             choices = df2$Team),
+                 uiOutput("CheckboxYear")
+                 
+
+               ),
+               mainPanel(
+                 
+               )
+               ),
       tabPanel("college and position",
                sidebarLayout(
                  sidebarPanel(
@@ -157,6 +172,24 @@ server <- function(input, output) {
            size = "Weight/height (lbs/in)",
            color = "Position")
   })
+  
+  Team_data<- reactive({
+    s2 <- df2 %>% 
+      filter(Team %in% input$Team_select)
+  })
+  
+  
+  output$CheckboxYear <- renderUI({
+    s3 <- df2 %>% 
+      filter(Team %in% input$Team_select)
+      mutate(Passing = Pass, Rushing =`Rushing.Attempts`  )
+      filter(!is.na(Passing) & !is.na(Rushing))
+
+    checkboxGroupInput("Year_Select", "Choose Year",
+                       choices = unique(s3$Year))
+  })
+  
+  
 }
 
 shinyApp(ui = ui, server = server)
