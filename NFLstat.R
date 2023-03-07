@@ -28,7 +28,27 @@ ui <- fluidPage(
     tabsetPanel(
       tabPanel("Introduction",
                br(),
-               p("BH3 group numbers: Tawsif Ahmed, Maggie O'Brien, Carol Zhao, Yishi Zheng")),
+               h3("The Data"),
+               p("The dataset we will be using is the basic information on NFL players and their statistics.  We found this dataset on Kaggle.  There are three groups of data (basic stats, career stats, and game logs).  This data was collected by the National Football League.  However, this data was last updated 6 years ago, according to Kaggle, so there will likely be some out-of-date information.  
+"),
+               h3("The Audience"),
+               p("Some audiences for this data could be anyone who is interested 
+                 in football statistics, an individual in a fantasy football league, 
+                 or an avid fan of America’s pastime.  These audiences overlap, so the 
+                 target audience is an", tags$b("enthusiastic football fan.")),
+               h3("The Questions"),
+               tags$li("What college do professional football players most 
+               frequently hail from, and what positions do they play?"),
+               tags$li("What teams are more likely to do a rush play rather than
+                       a pass play? What are the average yards gained for rushing 
+                       per yard?"),
+               tags$li("What is the average weight and height of each football
+                       position?"),
+               br(),
+               h3("The Group"),
+               p("BH3 group numbers: Tawsif Ahmed, Maggie O'Brien, 
+                 Carol Zhao, Yishi Zheng")
+                ),
       tabPanel("Height/Weight Info",
                sidebarPanel(
                  checkboxGroupInput(inputId = "position_select",
