@@ -16,6 +16,10 @@ defense_positions <- c("CB", "DB", "DE", "DL", "DT", "FS", "ILB", "LB", "MLB",
 offense_positions <- c("C", "FB", "G", "OG", "OL", "OLB", "OT", "QB", "RB", 
                        "WR", "T", "TE")
 specialteams <- c("K", "LS", "P")
+pos_choice <- unique(df$Position)
+no_blanks <- pos_choice[pos_choice != ""]
+coloroptions <- c("cornflowerblue", "darkorchid4", "darkred", "darkorange3", 
+                                  "darkolivegreen4")
 
 ui <- fluidPage(
   tags$head(
@@ -76,14 +80,19 @@ ui <- fluidPage(
                              selectize = FALSE),
                  checkboxGroupInput(inputId = "position_select",
                                     label = "Select position(s)",
-                                    choices = unique(df$Position),
+                                    choices = no_blanks, 
                                     selected = "CB",
                                     inline = FALSE,
                                     width = NULL),
+                 radioButtons(inputId = "color",
+                              label = "Select a color",
+                              choices = coloroptions,
+                              selected = coloroptions[1]),
                ),
                mainPanel(
                  plotOutput("plot1"),
-                 verbatimTextOutput("summary")
+                 verbatimTextOutput("summary"),
+                 plotOutput("plot2")
                )
       ),
       tabPanel("Rushing/Passing"),
@@ -184,10 +193,10 @@ server <- function(input, output) {
   data_subset <- reactive({
     df %>%
       filter(Position %in% input$groups,
-             Position %in% input$position_select)
+             Position %in% input$position_select) 
   })
   output$plot1 <- renderPlot ({
-    data_subset() %>% 
+    data_subset() %>%
       filter(!is.na(Weight), !is.na(Height)) %>%
       group_by(Position)%>%
       summarize(meanweight = mean(Weight),
@@ -200,6 +209,16 @@ server <- function(input, output) {
            size = "Weight/height (lbs/in)",
            color = "Position")
   })
+  
+  output$plot2 <- renderPlot ({
+    df %>%
+      filter(!is.na(Weight), Position != "",
+             !is.na(Height), Current.Status == "Active") %>%
+      ggplot(aes(x=Weight, y=Height)) +
+      geom_point(col=input$color) +
+      labs(title = "Weight vs. Height")
+  })
 }
+names(df)
 
 shinyApp(ui = ui, server = server)
