@@ -164,11 +164,11 @@ server <- function(input, output) {
   
   output$plot1 <- renderPlot ({
     data_subset() %>% 
-      filter(!is.na(Weight..lbs.),
-             !is.na(Height..inches.)) %>%
+      filter(!is.na(Weight),
+             !is.na(Height)) %>%
       group_by(Position)%>%
-      summarize(meanweight = mean(Weight..lbs.),
-                meanheight= mean(Height..inches.)) %>%
+      summarize(meanweight = mean(Weight),
+                meanheight= mean(Height)) %>%
       filter(Position %in% input$position_select) %>%
       ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight), 
                  col=Position)) +
