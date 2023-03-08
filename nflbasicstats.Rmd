@@ -39,6 +39,11 @@ dim(basicstats)
 names(basicstats)
 ```
 ##Need to delete X column
+basicstats %>%
+      filter(!is.na(Weight), !is.na(Height)) %>%
+      group_by(Position) %>%
+      summarize(meanweight = mean(Weight),
+                meanheight= mean(Height)) 
 
 ```{r, echo=FALSE}
 basicstats %>%

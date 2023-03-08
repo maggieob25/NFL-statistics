@@ -61,12 +61,21 @@ ui <- fluidPage(
                                     width = NULL),
                  selectInput(inputId = "groups", label = "Select offense, etc.", 
                              choices =  c("Defense","Offense","Special Teams"),
-                             selected = "Defense")
+                             selected = "Defense"),
+                 radioButtons(inputId = "color",
+                              label = "Select a color",
+                              choices = coloroptions,
+                              selected = coloroptions[1]),
                ),
                mainPanel(
+                 p("This graph demonstrates how the average height and weight 
+                   varies drastically for each NFL football position."),
                  plotOutput("plot1"),
-                 verbatimTextOutput("summary"),
                  tags$hr(),
+                 p("Here, this graph will select specifically defense, offense,
+                   or special teams and produce the mean height and weight per 
+                   group.  Again, the average sizes of football players is highly 
+                   dependent on their position."),
                  plotOutput("plot2")
                )
       ),
@@ -244,11 +253,10 @@ server <- function(input, output) {
       group_by(Position) %>% 
       summarize(meanweight = mean(Weight),
                 meanheight= mean(Height)) %>%
-      ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight),
-             col=Position))+
-      geom_point() +
+      ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight)))+
+      geom_point(col=input$color) +
       labs(title = "Weight vs. Height per 'team'",
-           x = "Weight (lbs)", y = "Height (in)", color = "Position",
+           x = "Mean Weight (lbs)", y = "Mean Height (in)", color = "Position",
            size = "Weight/height (lbs/in)")+
       theme(plot.title = element_text(hjust = 0.5))
   })
