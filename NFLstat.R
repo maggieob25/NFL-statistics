@@ -60,9 +60,7 @@ ui <- fluidPage(
                                     inline = FALSE,
                                     width = NULL),
                  selectInput(inputId = "groups", label = "Select offense, etc.", 
-                             choices = c("Defense" = paste(defense_positions, collapse = ", "), 
-                             "Offense" = paste(offense_positions, collapse = ", "),
-                             "Special Teams" = paste(specialteams,collapse = ", ")),
+                             choices =  c("Defense","Offense","Special Teams"),
                              selected = "Defense")
                ),
                mainPanel(
@@ -194,17 +192,29 @@ server <- function(input, output) {
   })
   
   data_subset2 <- reactive({
-    df %>%
-      filter(Position %in% input$groups) 
+    if(input$groups == "Defense"){
+    s3 <- df %>%
+      filter(Position %in% defense_positions) 
+    }
+    else if(input$groups == "Offense"){
+      s3 <- df %>%
+        filter(Position %in% offense_positions) 
+    }
+    else if(input$groups == "Special Teams"){
+      s3 <- df %>%
+        filter(Position %in% specialteams) 
+    }
   })
   
   output$plot2 <- renderPlot ({
     data_subset2() %>% 
       filter(!is.na(Weight),
              !is.na(Height)) %>%
-      group_by(Position)%>%
-      ggplot(aes(x=Weight, y=Height, size=(Weight/Height), 
-                 col=Position)) +
+      group_by(Position) %>% 
+      summarize(meanweight = mean(Weight),
+                meanheight= mean(Height)) %>%
+      ggplot(aes(x=meanweight, y=meanheight, size=(meanweight/meanheight),
+             col=Position))+
       geom_point() +
       labs(title = "Weight vs. Height per 'team'",
            x = "Weight (lbs)", y = "Height (in)", color = "Position")
@@ -228,7 +238,7 @@ server <- function(input, output) {
     if(input$Decades == "Before 2000"){
     t <- Team_data() %>% 
       filter(Year < 2000) %>% 
-      group_by(Year) %>% 
+      group_by(Team, Year) %>% 
       summarize(Passing_Attempts = mean(Pass_Attempts), Pass_Completion_Rate = mean(Pass_Completion_Rate),
                 Avg_Passing_Yds = mean(Avg_Passing_Yards), Rushing_Attempts = mean(Rush_attempts),
                 Avg_Rushing_Yds = mean(Avg_Rushing)
@@ -237,7 +247,7 @@ server <- function(input, output) {
     else{
       t <- Team_data() %>% 
         filter(Year > 2000) %>% 
-        group_by(Year) %>% 
+        group_by(Team, Year) %>% 
         summarize(Passing_Attempts = mean(Pass_Attempts), Pass_Completion_Rate = mean(Pass_Completion_Rate),
                   Avg_Passing_Yds = mean(Avg_Passing_Yards), Rushing_Attempts = mean(Rush_attempts),
                   Avg_Rushing_Yds = mean(Avg_Rushing)
