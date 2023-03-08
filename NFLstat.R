@@ -81,7 +81,7 @@ ui <- fluidPage(
                  tableOutput("Game_Table")
                )
       ),
-      tabPanel("college and position",
+      tabPanel("College and Position",
                sidebarLayout(
                  sidebarPanel(
                    sliderInput("n", 
@@ -130,7 +130,31 @@ ui <- fluidPage(
                  )
                )
       ),
-      tabPanel("Conclusion")
+      tabPanel("Conclusion",
+               br(),
+               h2("Conclusion"),
+               p("Among all the positions,", strong("Tackle (T)"),",", strong("Offensive Line (OL)"),"are typically 
+                 the tallest and heaviest according to the dataset.", strong("Wide Receiver (WR)"), 
+                 "and,", strong("Right-back (RB)"), "tend to be the opposite. "),
+               p("Although most of the teams tend to", strong("pass more than rush"), "there are a few 
+                 teams that are found to attempt more rushing than passing. For example,", 
+                 em("St Louis Rams"), "attempted more rushing than passing in 2003 and 2004.", 
+                 em("Tennesse Titans"), "attempted more rushing than passing in 2001 and 2003."),
+               p("Our data showed that professional football players most frequently hail 
+                 from", strong("Notre Dame, USC, Ohio State, Michigan, and Penn State."), "The most popular
+                 positions are wide receiver, defensive end, cornerback, running back, and defensive back."),
+               h2("Quality of Data"),
+               p("We are able to answer most of our proposed questions accurately to an extent. There are a 
+                 lot of missing years and unuseful variables that would affect the outcome of the analysis. 
+                 For example, the passing vs. rushing data for", em("Cleveland Indians"), "is completely missing both before 
+                 and after 2000, because", em("Cleveland Indians"), "played only one season in 1931 before it turned into a 
+                 baseball team. Yet, the earliest year in this dataset is 1933, which means the data for the team 
+                 is not properly recorded. There are a lot of other similar cases in the dataset, which might affect 
+                 the overall team statistics. \n"),
+               h2("Future Ideas"),
+               p("For future research, we can explore the", strong("salary of players"), "to see what positions or teams are making 
+                 the most money. We can also explore the", strong("demographics"), "of the players.")
+      )
     )
   )
 )
