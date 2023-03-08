@@ -161,8 +161,10 @@ server <- function(input, output) {
   })
   
   output$position <- renderPlot({
-    ggplot(sample(), aes(x = Position,col= College))+
-      geom_bar() + 
+    sample() %>% 
+      filter(!is.na(Position)) %>% 
+      ggplot(aes(x = Position,col= College))+
+      geom_bar(position = "dodge") + 
       labs(x = "Positions", y = "Number of players")
   })
   
@@ -223,7 +225,8 @@ server <- function(input, output) {
   output$CheckboxTeam <- renderUI({
     
     checkboxGroupInput("Team_Select", "Choose Team",
-                       choices = unique(df2$Team))
+                       choices = unique(df2$Team), 
+                       selected = "Seattle Seahawks")
   })
   
   Team_data<- reactive({
@@ -234,7 +237,6 @@ server <- function(input, output) {
   })
   
   output$Game_Table <- renderTable({
-    
     if(input$Decades == "Before 2000"){
     t <- Team_data() %>% 
       filter(Year < 2000) %>% 
@@ -255,6 +257,8 @@ server <- function(input, output) {
     }
     
   })
+  
+  #Add more text for pg 3
 }
 
 shinyApp(ui = ui, server = server)
