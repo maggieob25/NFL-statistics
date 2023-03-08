@@ -163,8 +163,10 @@ server <- function(input, output) {
   output$position <- renderPlot({
     sample() %>% 
       filter(!is.na(Position)) %>% 
-      ggplot(aes(x = Position,col= College))+
-      geom_bar(position = "dodge") + 
+      group_by(Position) %>% 
+      mutate(count = n()) %>% 
+      ggplot(aes(x = Position, y = count, fill = factor(College)))+
+      geom_bar(stat = "identity", position = "dodge") + 
       labs(x = "Positions", y = "Number of players")
   })
   
