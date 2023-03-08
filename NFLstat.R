@@ -78,6 +78,8 @@ ui <- fluidPage(
                  uiOutput("CheckboxTeam")
                ),
                mainPanel(
+                 textOutput("Info1"),
+ #                textOutput("Info2"),
                  tableOutput("Game_Table")
                )
       ),
@@ -216,7 +218,8 @@ server <- function(input, output) {
       labs(title = "Weight vs. Height per position",
            x = "Mean weight (lbs)", y = "Mean height (in)",
            size = "Weight/height (lbs/in)",
-           color = "Position")
+           color = "Position")+
+      theme(plot.title = element_text(hjust = 0.5))
   })
   
   data_subset2 <- reactive({
@@ -245,7 +248,9 @@ server <- function(input, output) {
              col=Position))+
       geom_point() +
       labs(title = "Weight vs. Height per 'team'",
-           x = "Weight (lbs)", y = "Height (in)", color = "Position")
+           x = "Weight (lbs)", y = "Height (in)", color = "Position",
+           size = "Weight/height (lbs/in)")+
+      theme(plot.title = element_text(hjust = 0.5))
   })
   
   output$CheckboxTeam <- renderUI({
@@ -284,7 +289,48 @@ server <- function(input, output) {
     
   })
   
-  #Add more text for pg 3
+  output$Info1 <- renderText({
+    if(input$Decades == "Before 2000"){
+      avg_Pass <- Team_data() %>% 
+        filter(Year < 2000) %>% 
+        summarize(Passing_Attempts = mean(Pass_Attempts))
+      avg_Rush <- Team_data() %>%
+        filter(Year < 2000) %>% 
+        summarize(Rushing_Attempts = mean(Rush_attempts))
+    if(avg_Pass > avg_Rush){
+      paste("The NFl team/teams had more pass attempts than rush
+            attempts. The total pass attempts over the years was",
+            round(avg_Pass,2), "and rush attempts was", round(avg_Rush,2),
+            "\n")
+    }
+    else{
+      paste("The NFl team/teams had more pass attempts than rush
+            attempts. The total pass attempts over the years was",
+            `round(avg_Rush,2)`, "and rush attempts was", round(avg_Pass,2),
+            "\n")
+      }
+    }
+    else if(input$Decades == "After 2000"){
+      avg_Pass1 <- Team_data() %>%
+        filter(Year > 2000) %>% 
+        summarize(Passing_Attempts = mean(Pass_Attempts))
+      avg_Rush1 <- Team_data() %>% 
+        filter(Year > 2000) %>% 
+        summarize(Rushing_Attempts = mean(Rush_attempts))
+      if(avg_Pass1 > avg_Rush1){
+        paste("The NFl team/teams had more pass attempts than rush
+            attempts. The total pass attempts over the years was",
+              round(avg_Pass1,2), "and rush attempts was", round(avg_Rush1,2),
+              "\n")
+      }
+      else{
+        paste("The NFl team/teams had more pass attempts than rush
+            attempts. The total pass attempts over the years was",
+              `round(avg_Rush1,2)`, "and rush attempts was", round(avg_Pass1,2),
+              "\n")
+      }
+    }
+  })
 }
 
 shinyApp(ui = ui, server = server)
