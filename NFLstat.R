@@ -5,7 +5,7 @@ library(DT)
 df <- read_delim("CSVnflbasicstatsNEW.csv")
 df2 <- read_delim("Game-Plays.csv")
 
-df_position <- df%>% group_by(Position) %>% summarize(number_of_players=n())
+df_position <- df%>% filter(!is.na(Position)) %>% group_by(Position) %>% summarize(number_of_players=n())
 df_position <- df_position[order(df_position$number_of_players,decreasing = TRUE),] 
 
 
